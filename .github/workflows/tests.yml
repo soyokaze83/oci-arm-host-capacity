@@ -6,7 +6,7 @@ on:
       - main
   workflow_dispatch:
   schedule:
-    - cron: '*/10 * * * *' # Automatically runs every 10 minutes
+    - cron: '*/10 * * * *'
 
 jobs:
   retry-oci:
@@ -26,6 +26,15 @@ jobs:
       - name: Install dependencies
         run: composer update --prefer-dist --no-progress
 
+      # Write the raw secret content into a key.pem file on the runner
+      - name: Create Private Key File
+        run: |
+          echo "$OCI_KEY_DATA" > key.pem
+          chmod 600 key.pem
+        env:
+          OCI_KEY_DATA: ${{ secrets.OCI_PRIVATE_KEY_FILENAME }}
+
+      # Execute script pointing OCI_PRIVATE_KEY_FILENAME to the created key.pem file
       - name: Execute OCI Script
         run: php index.php
         env:
@@ -33,7 +42,7 @@ jobs:
           OCI_USER_ID: ${{ secrets.OCI_USER_ID }}
           OCI_TENANCY_ID: ${{ secrets.OCI_TENANCY_ID }}
           OCI_KEY_FINGERPRINT: ${{ secrets.OCI_KEY_FINGERPRINT }}
-          OCI_PRIVATE_KEY_FILENAME: ${{ secrets.OCI_PRIVATE_KEY_FILENAME }}
+          OCI_PRIVATE_KEY_FILENAME: ./key.pem
           OCI_AVAILABILITY_DOMAIN: ${{ secrets.OCI_AVAILABILITY_DOMAIN }}
           OCI_SUBNET_ID: ${{ secrets.OCI_SUBNET_ID }}
           OCI_IMAGE_ID: ${{ secrets.OCI_IMAGE_ID }}
