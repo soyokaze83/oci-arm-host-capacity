@@ -1,49 +1,33 @@
-name: Tests
+name: OCI ARM Host Capacity Retry
 
 on:
   push:
     branches:
       - main
-  pull_request:
-    branches:
-      - main
-
-#  schedule:
-#    - cron: '*/5 * * * *'
+  workflow_dispatch:
+  schedule:
+    - cron: '*/10 * * * *' # Automatically runs every 10 minutes
 
 jobs:
-  tests:
+  retry-oci:
     runs-on: ubuntu-latest
     strategy:
       matrix:
         php-versions: ['8.3']
-    name: integration-tests (PHP ${{ matrix.php-versions }})
+    name: OCI Auto Retry (PHP ${{ matrix.php-versions }})
     steps:
-      - uses: actions/checkout@v1
+      - uses: actions/checkout@v4
+
       - name: Install PHP
         uses: shivammathur/setup-php@v2
         with:
           php-version: ${{ matrix.php-versions }}
-      - name: Validate composer.json and composer.lock
-        run: composer validate
-
-      - name: Get Composer Cache Directory
-        id: composer-cache
-        run: |
-          echo "::set-output name=dir::$(composer config cache-files-dir)"
-      - uses: actions/cache@v2
-        with:
-          path: ${{ steps.composer-cache.outputs.dir }}
-          key: ${{ runner.os }}-${{ matrix.php-version }}-composer-${{ matrix.dependencies }}-${{ hashFiles('**/composer.lock') }}
-          restore-keys: |
-            ${{ runner.os }}-${{ matrix.php-version }}-composer-${{ matrix.dependencies }}-
 
       - name: Install dependencies
-        run: |
-          composer update --prefer-dist --no-progress
-      - name: Run test suite
-        run: |
-          vendor/bin/phpunit --color tests/
+        run: composer update --prefer-dist --no-progress
+
+      - name: Execute OCI Script
+        run: php index.php
         env:
           OCI_REGION: ${{ secrets.OCI_REGION }}
           OCI_USER_ID: ${{ secrets.OCI_USER_ID }}
@@ -60,4 +44,3 @@ jobs:
           OCI_SSH_PUBLIC_KEY: ${{ secrets.OCI_SSH_PUBLIC_KEY }}
           TELEGRAM_USER_ID: ${{ secrets.TELEGRAM_USER_ID }}
           TELEGRAM_BOT_API_KEY: ${{ secrets.TELEGRAM_BOT_API_KEY }}
-
