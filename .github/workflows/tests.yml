@@ -1,55 +1,55 @@
-name: OCI ARM Host Capacity Retry
+# name: OCI ARM Host Capacity Retry
 
-on:
-  push:
-    branches:
-      - main
-  workflow_dispatch:
-  schedule:
-    - cron: '*/10 * * * *'
+# on:
+#   push:
+#     branches:
+#       - main
+#   workflow_dispatch:
+#   schedule:
+#     - cron: '*/10 * * * *'
 
-jobs:
-  retry-oci:
-    runs-on: ubuntu-latest
-    strategy:
-      matrix:
-        php-versions: ['8.3']
-    name: OCI Auto Retry (PHP ${{ matrix.php-versions }})
-    steps:
-      - uses: actions/checkout@v4
+# jobs:
+#   retry-oci:
+#     runs-on: ubuntu-latest
+#     strategy:
+#       matrix:
+#         php-versions: ['8.3']
+#     name: OCI Auto Retry (PHP ${{ matrix.php-versions }})
+#     steps:
+#       - uses: actions/checkout@v4
 
-      - name: Install PHP
-        uses: shivammathur/setup-php@v2
-        with:
-          php-version: ${{ matrix.php-versions }}
+#       - name: Install PHP
+#         uses: shivammathur/setup-php@v2
+#         with:
+#           php-version: ${{ matrix.php-versions }}
 
-      - name: Install dependencies
-        run: composer update --prefer-dist --no-progress
+#       - name: Install dependencies
+#         run: composer update --prefer-dist --no-progress
 
-      # Write the raw secret content into a key.pem file on the runner
-      - name: Create Private Key File
-        run: |
-          echo "$OCI_KEY_DATA" > key.pem
-          chmod 600 key.pem
-        env:
-          OCI_KEY_DATA: ${{ secrets.OCI_PRIVATE_KEY_FILENAME }}
+#       # Write the raw secret content into a key.pem file on the runner
+#       - name: Create Private Key File
+#         run: |
+#           echo "$OCI_KEY_DATA" > key.pem
+#           chmod 600 key.pem
+#         env:
+#           OCI_KEY_DATA: ${{ secrets.OCI_PRIVATE_KEY_FILENAME }}
 
-      # Execute script pointing OCI_PRIVATE_KEY_FILENAME to the created key.pem file
-      - name: Execute OCI Script
-        run: php index.php
-        env:
-          OCI_REGION: ${{ secrets.OCI_REGION }}
-          OCI_USER_ID: ${{ secrets.OCI_USER_ID }}
-          OCI_TENANCY_ID: ${{ secrets.OCI_TENANCY_ID }}
-          OCI_KEY_FINGERPRINT: ${{ secrets.OCI_KEY_FINGERPRINT }}
-          OCI_PRIVATE_KEY_FILENAME: ./key.pem
-          OCI_AVAILABILITY_DOMAIN: ${{ secrets.OCI_AVAILABILITY_DOMAIN }}
-          OCI_SUBNET_ID: ${{ secrets.OCI_SUBNET_ID }}
-          OCI_IMAGE_ID: ${{ secrets.OCI_IMAGE_ID }}
-          OCI_OCPUS: ${{ secrets.OCI_OCPUS }}
-          OCI_MEMORY_IN_GBS: ${{ secrets.OCI_MEMORY_IN_GBS }}
-          OCI_SHAPE: ${{ secrets.OCI_SHAPE }}
-          OCI_MAX_INSTANCES: ${{ secrets.OCI_MAX_INSTANCES }}
-          OCI_SSH_PUBLIC_KEY: ${{ secrets.OCI_SSH_PUBLIC_KEY }}
-          TELEGRAM_USER_ID: ${{ secrets.TELEGRAM_USER_ID }}
-          TELEGRAM_BOT_API_KEY: ${{ secrets.TELEGRAM_BOT_API_KEY }}
+#       # Execute script pointing OCI_PRIVATE_KEY_FILENAME to the created key.pem file
+#       - name: Execute OCI Script
+#         run: php index.php
+#         env:
+#           OCI_REGION: ${{ secrets.OCI_REGION }}
+#           OCI_USER_ID: ${{ secrets.OCI_USER_ID }}
+#           OCI_TENANCY_ID: ${{ secrets.OCI_TENANCY_ID }}
+#           OCI_KEY_FINGERPRINT: ${{ secrets.OCI_KEY_FINGERPRINT }}
+#           OCI_PRIVATE_KEY_FILENAME: ./key.pem
+#           OCI_AVAILABILITY_DOMAIN: ${{ secrets.OCI_AVAILABILITY_DOMAIN }}
+#           OCI_SUBNET_ID: ${{ secrets.OCI_SUBNET_ID }}
+#           OCI_IMAGE_ID: ${{ secrets.OCI_IMAGE_ID }}
+#           OCI_OCPUS: ${{ secrets.OCI_OCPUS }}
+#           OCI_MEMORY_IN_GBS: ${{ secrets.OCI_MEMORY_IN_GBS }}
+#           OCI_SHAPE: ${{ secrets.OCI_SHAPE }}
+#           OCI_MAX_INSTANCES: ${{ secrets.OCI_MAX_INSTANCES }}
+#           OCI_SSH_PUBLIC_KEY: ${{ secrets.OCI_SSH_PUBLIC_KEY }}
+#           TELEGRAM_USER_ID: ${{ secrets.TELEGRAM_USER_ID }}
+#           TELEGRAM_BOT_API_KEY: ${{ secrets.TELEGRAM_BOT_API_KEY }}
